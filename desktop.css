@@ -1,0 +1,228 @@
+@font-face {
+    font-family: RaiderCrusader;
+    src: url(Fonts/raidercrusader.ttf);
+    /*   Font created by Daniel Zadorozny, http://www.iconian.com/    */
+}
+
+body {
+    background-color: white;
+    min-width: 800px;
+}
+
+/* ---------- index.html START ---------- */
+
+#index-container {
+    font-family: RaiderCrusader, sans-serif;
+    border: 2px solid red;
+    height: 260px;
+    width: 60%;
+    max-width: 500px;
+    margin: auto;
+    color: #FF3100;
+    
+}
+#index-container #form-div {
+    height: 90%;
+    width: 90%;
+    position: relative;
+    margin: 8px auto;
+    font-size: 20px;
+    
+}
+#index-container form {
+    text-align: center;
+    margin-top: 30px;
+}
+#index-container #input-dimensions {
+    width: 40px;
+    border: 1px solid #FF3100;
+}
+#index-container #play-btn {
+    font-family: RaiderCrusader, sans-serif;
+    font-size: 22px;
+    height: 50px;
+    width: 90px;
+    color: #FF3100;
+    border: 2px solid #FF3100;   
+}
+#main-title {
+    font-family: RaiderCrusader, sans-serif;
+    margin: auto;
+    width: 30%;
+    text-align: center;
+    font-size: 25px;
+    height: 70px;
+    line-height: 30px;
+    vertical-align: middle;
+    color: #FF3100;
+}
+#main-title a {
+    text-decoration: none;
+    color: #FF3100;
+}
+#main-title a:hover {
+    color: #911b00;
+}
+
+
+#footer {
+    font-family: sans-serif;
+    font-size: 10px;
+    width: 50%;
+    text-align: center;
+    margin: auto;
+    color: #FF3100;
+}
+
+/* ---------- index.html END ---------- */
+
+
+
+
+
+
+
+
+/* ---------- game.php START ---------- */
+
+#game-container {
+    height: 700px;
+    width: 90%;
+    margin: auto;
+    margin-top: 10px;
+    
+}
+#game-board {
+    height: 95%;
+    margin: 10px;
+}
+#game-table {
+    border: 1px solid grey;
+    margin: auto;
+    margin-top: 20px;
+    border-radius: 1%;
+}
+#game-table-body {
+    cursor: pointer;
+}
+#game-table td .square-cell {
+    border: 1px solid grey;
+    height: 20px;
+    width: 20px;
+    background-color: #ff7756;
+    font-family: sans-serif;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+}
+
+#game-table td .hexagon-cell-inner {
+    height: 20px;
+    width: 20px;
+    background-color: #ff7756;
+    font-family: sans-serif;
+    font-weight: 600;
+    text-align: center;
+    user-select: none;
+    transform: rotate(45deg);
+    margin-top: 3px;
+    margin-left: -1px;
+}
+.hex-outer {
+    border: 1px dotted transparent;
+    height: 28px;
+    width: 18px;
+    overflow: hidden;
+}
+.hex-outer .inner-cell {
+   transform: rotate(-45deg);
+}
+.skewed {
+    
+}
+
+
+
+#mine-img {
+    height: 15px;
+    width: 15px;
+}
+#flag-img {
+    height: 15px;
+    width: 15px;
+}
+#game-controls {
+    height: 40px;
+    width: 250px;
+    margin: auto;
+    margin-top: 10px;
+    
+}
+#game-reset-btn {
+    border: 2px solid #FF3100;
+    height: 100%;
+    width: 100px;
+    float: right;
+    text-align: center;
+    line-height: 0px;
+    font-size: 20px;
+    user-select: none;
+    cursor: pointer;
+}
+#game-reset-btn h3 {
+    margin-top: 20px;
+    margin-left: -3px;
+}
+#game-timer {
+    border: 2px solid #FF3100;
+    height: 100%;
+    width: 100px;
+    display: inline-block;
+    text-align: center;
+    font-size: 20px;
+    vertical-align: middle;
+    user-select: none;
+    cursor: default;
+}
+#game-timer h3 {
+    margin-top: 6px;
+}
+.game-btn-h3 {
+    font-family: RaiderCrusader, sans-serif;
+    text-align: center;
+    color: #FF3100;
+}
+#game-timer:hover, #game-reset-btn:hover {
+    background-color: #ffaa56; 
+}
+#message-div {
+    height: 100px;
+    width: 300px;
+    margin: auto;
+    margin-top: 10px;
+}
+#message-h3 {
+    font-family: RaiderCrusader, sans-serif;
+    color: #FF3100;
+    font-size: 60px;
+    text-align: center;
+    line-height: 0px;
+    animation-name: message-fade-in;
+    animation-duration: 1s;
+}
+@keyframes message-fade-in {
+    from {color: white; margin-top: 30px;}
+    to {color: #FF3100; margin-top 10px;}
+}
+
+
+
+
+
+/* ---------- game.php END ---------- */
+
+
+
+
+
+
