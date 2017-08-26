@@ -25,25 +25,63 @@
             var cell_shape = "<?php echo $cell_shape; ?>";
             var dim = parseInt("<?php echo $dimensions; ?>");
             var colour_mode = "<?php echo $colour_mode; ?>" === "True" ? true : false;
-            
-            // Cell constructor.
-            function cell() {
-                this.covered = true;
-                this.flagged = false;
-                this.number = 0;
-                this.bomb = false;
-            }
-            
-            // Set up multidimensional array of cells.
-            var board = new Array(dim);
-            function resetBoard() {
-                for (var i = 0; i < dim; i++) {
-                    board[i] = new Array(dim);
-                    for (var j = 0; j < dim; j++) {
-                        board[i][j] = new cell();
+           
+            // Board class (model).
+            function Board() {
+                // Cell constructor.
+                this.cell = function() {
+                    this.covered = true;
+                    this.flagged = false;
+                    this.number = 0;
+                    this.bomb = false;
+                }
+
+                // Set up multidimensional array of cells.
+                this.board = new Array(dim);
+                this.resetBoard = function() {
+                    for (var i = 0; i < dim; i++) {
+                        this.board[i] = new Array(dim);
+                        for (var j = 0; j < dim; j++) {
+                            this.board[i][j] = new this.cell();
+                        }
                     }
                 }
+                // Toggles a cell as a mine.
+                this.toggleMine = function(row, col) {
+                    this.board[row][col].bomb = !this.board[row][col].bomb;
+                }
+                this.isMine = function(row, col) {
+                    return this.board[row][col].bomb;
+                }
+                // Increments a cell's number.
+                this.incrementCell = function(row, col) {
+                    this.board[row][col].number++;
+                }
+                this.getNum = function(row, col) {
+                    return this.board[row][col].number;
+                }
+                this.isCovered = function(row, col) {
+                    return this.board[row][col].covered;   
+                }
+                this.isFlagged = function(row, col) {
+                    return this.board[row][col].flagged;
+                }
+                this.flag = function(row, col) {
+                    this.board[row][col].flagged = true;
+                }
+                this.unflag = function(row, col) {
+                    this.board[row][col].flagged = false;
+                }
+                this.uncover = function(row, col) {
+                    this.board.[row][col].covered = false;
+                }
+                this.cover = function(row, col) {
+                    this.board.[row][col].covered = true;
+                }
+                
             }
+            
+            
             
             var interval;
             var stopwatch_running = false;
@@ -51,8 +89,10 @@
                 time_box = document.getElementById("timer-h3");
                 time_box.innerHTML = "00:00";
                 
-                resetBoard();
-                                
+                var game_board = new Board();
+                
+                game_board.resetBoard();
+                
                 var tbl = document.getElementById("game-table-body");
                 
                 // Insert HTML cells into the table.
@@ -95,18 +135,18 @@
                 for (var i = 0; i < dim; i++) {
                     var r1 = Math.floor(Math.random() * dim);
                     var r2 = Math.floor(Math.random() * dim);
-                    board[r1][r2].bomb = true;
+                    game_board.toggleMine(r1, r2);
                     
                     // Increment the numbers of the cells surrounding the mines.
-                    try { board[r1-1][r2-1].number++; } catch (e) {}
-                    try { board[r1][r2-1].number++; } catch (e) {}
-                    try { board[r1][r2+1].number++; } catch (e) {}
-                    try { board[r1+1][r2-1].number++; } catch (e) {}
-                    try { board[r1+1][r2].number++; } catch (e) {}
-                    try { board[r1-1][r2].number++; } catch (e) {}
+                    try { game_board.incrementCell(r1-1, r2-1); } catch (e) {}
+                    try { game_board.incrementCell(r1, r2-1); } catch (e) {}
+                    try { game_board.incrementCell(r1, r2+1); } catch (e) {}
+                    try { game_board.incrementCell(r1+1, r2-1); } catch (e) {}
+                    try { game_board.incrementCell(r1+1, r2); } catch (e) {}
+                    try { game_board.incrementCell(r1-1, r2); } catch (e) {}
                     if (cell_shape == "Square") {
-                        try { board[r1-1][r2+1].number++; } catch (e) {}
-                        try { board[r1+1][r2+1].number++; } catch (e) {}
+                        try { game_board.incrementCell(r1-1, r2+1); } catch (e) {}
+                        try { game_board.incrementCell(r1+1, r2+1); } catch (e) {}
                     }
                 }
             } //newGame()   
@@ -149,19 +189,18 @@
                 // substring(3) removes 'row' and 'col' from the element IDs.
                 var col = parseInt(cell.id.substring(3));
                 var row = parseInt(cell.parentElement.parentElement.id.substring(3));                
-                var thisCell = board[row][col];
                 
                 // If the cell has already been uncovered, return from function.
-                if (!thisCell.covered) return false;
+                if (!game_board.isCovered(row, col)) return false;
                 
                 // For flagging/unflagging cells (with right clicks).
                 if (click_type == 2) {
-                    if (thisCell.flagged) {
-                        thisCell.flagged = false;
+                    if (game_board.isFlagged(row, col)) {
+                        game_board.unflag(row, col);
                         cell.innerHTML = "";
                     }
                     else {
-                        thisCell.flagged = true;
+                        game_board.flag(row, col);
                         cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
                         // If number of bombs = number of uncovered cells, the game is won.
                         if (total_uncovered_cells == (dim*dim)-dim) 
@@ -172,20 +211,20 @@
                 
                 // For uncovering cells (with left clicks).
                 if (click_type == 0) {
-                    thisCell.covered = false;
+                    game_board.uncover(row, col);
                     cell.setAttribute("style", "background-color: #ff3100");
                     cell.innerHTML = "";
                     total_uncovered_cells++;
                     if (total_uncovered_cells == (dim*dim)-dim)
                         winGame();
                 }
-                if (thisCell.bomb) {
+                if (game_board.isBomb(row, col)) {
                     cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
                     loseGame();
                     return true;
                 }
-                if (thisCell.number != 0) {
-                    cell.innerHTML = '<div class="inner-cell">' + thisCell.number + '</div>';
+                if (game_board.getNum(row, col) != 0) {
+                    cell.innerHTML = '<div class="inner-cell">' + game_board.getNum(row, col) + '</div>';
                 }
                 
             }
