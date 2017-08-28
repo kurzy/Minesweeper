@@ -82,7 +82,6 @@
             }
             
             
-            
             var interval;
             var stopwatch_running = false;
             function newGame() {
