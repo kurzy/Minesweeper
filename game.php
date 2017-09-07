@@ -106,8 +106,27 @@
                 // Returns if stopwatch is running.
                 this.swrunning = function() { return this.stopwatch_running; }
                 
-                // Paints a specified cell.
-                this.paintCell = function (row, col, type) {
+                // Paints a given cell a certain way.
+                this.paintCell = function (cell, type) {
+                    if (type == "unflag") {
+                        cell.innerHTML = "";
+                    }
+                    else if (type == "flag") {
+                        cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
+                    }
+                    else if (type == "uncover") {
+                        cell.setAttribute("style", "background-color: #ff3100");
+                        cell.innerHTML = "";
+                    }
+                    else if (type == "mine") {
+                        cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
+                    }
+                    // A cell's number is passed after the "num" string, eg. "num3", so use substr() to separate these out.
+                    else if (type.substr(0, 3) == "num") {
+                        cell.innerHTML = '<div class="inner-cell">' + type.substr(3, 1) + '</div>';   
+                    }
+                    
+                    
                     
                     
                     
@@ -137,7 +156,7 @@
                                 tbl.parentElement.setAttribute("style", tbl.parentElement.getAttribute("style") + " border: none;");
                             }
                         }
-                        // If hexagon cells, apply formatting to every 2nd row.
+                        // If hexagon cells, apply special formatting to every 2nd row.
                         if (cell_shape == "Hexagon") {
                             var x = 0;
                             if (i % 2 == 1) {
@@ -184,14 +203,16 @@
 
                     // For flagging/unflagging cells (with right clicks).
                     if (click_type == 2) {
+                        // If the cell is already flagged, unflag it.
                         if (game_board.isFlagged(row, col)) {
                             game_board.unflag(row, col);
-                            cell.innerHTML = "";
+                            display.paintCell(cell, "unflag");
                         }
+                        // Otherwise, if the cell isn't flagged, flag it now.
                         else {
                             game_board.flag(row, col);
-                            cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
-                            // If number of bombs = number of uncovered cells, the game is won.
+                            display.paintCell(cell, "flag");
+                            // If the number of bombs = number of uncovered cells, the game is won.
                             if (game_board.total_uncovered_cells == (dim*dim)-dim) 
                                 this.endGame("win");
                         }
@@ -200,19 +221,18 @@
                     // For uncovering cells (with left clicks).
                     if (click_type == 0) {
                         game_board.uncover(row, col);
-                        cell.setAttribute("style", "background-color: #ff3100");
-                        cell.innerHTML = "";
+                        display.paintCell(cell, "uncover");
                         game_board.total_uncovered_cells++;
                         if (game_board.total_uncovered_cells == (dim*dim)-dim)
                             this.endGame("win");
                     }
                     if (game_board.isMine(row, col)) {
-                        cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
+                        display.paintCell(cell, "mine");
                         this.endGame("lose");
                         return true;
                     }
                     if (game_board.getNum(row, col) != 0) {
-                        cell.innerHTML = '<div class="inner-cell">' + game_board.getNum(row, col) + '</div>';
+                        display.paintCell(cell, "num" + game_board.getNum(row, col));
                     }
                 }
                 
