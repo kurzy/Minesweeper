@@ -26,6 +26,7 @@
             var dim = parseInt("<?php echo $dimensions; ?>");
             var colour_mode = "<?php echo $colour_mode; ?>" === "True" ? true : false;
             
+            
             // Board class (model).
             function Board() {
                 this.cell = function() {
@@ -33,6 +34,7 @@
                     this.flagged = false;
                     this.number = 0;
                     this.bomb = false;
+                    this.color =  "";
                 }
                 // Set up multidimensional array of cells.
                 this.board = new Array(dim);
@@ -74,12 +76,18 @@
                 this.flag = function(row, col) { this.board[row][col].flagged = true; }
                 this.unflag = function(row, col) { this.board[row][col].flagged = false; }
                 this.uncover = function(row, col) { this.board[row][col].covered = false; }
+                
+                this.getColor = function(row, col) { return this.board[row][col].color; }
+                this.setColor = function(row, col, color) { this.board[row][col].color = color; }
             }
             
             // Display class is responsible for all of the visual displays.
             function Display() {
                 var total_seconds = 0;
                 this.stopwatch_running = false;
+                
+                this.color_palette = ["red", "skyblue", "orange", "green", "purple", "magenta", "gold", "teal", "aqua", "brown", "linen", "lightgray"];
+                
                 this.timer = function() {
                     total_seconds++;
                     var time = document.getElementById("timer-h3");
@@ -115,22 +123,65 @@
                         cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
                     }
                     else if (type == "uncover") {
-                        cell.setAttribute("style", "background-color: #ff3100");
-                        cell.innerHTML = "";
+                        if (!colour_mode) {
+                            cell.setAttribute("style", "background-color: #ff3100");
+                            cell.innerHTML = "";
+                        }
+                        else {
+                            cell.setAttribute("style", "background-color: " + this.getValidColour(cell, "free"));
+                            cell.innerHTML = "";
+                        }
                     }
                     else if (type == "mine") {
                         cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
+                        if (colour_mode) {
+                            cell.setAttribute("style", "background-color: " + this.getValidColour(cell, "used"));
+
+                        }
+                        
                     }
                     // A cell's number is passed after the "num" string, eg. "num3", so use substr() to separate these out.
                     else if (type.substr(0, 3) == "num") {
                         cell.innerHTML = '<div class="inner-cell">' + type.substr(3, 1) + '</div>';   
                     }
                     
+                }//paintCell()
+                
+                
+                // Retrieves a colour for a cell, if type is "free", then it retrieves a colour that hasn't been used yet in the surrounding cells (for painting non-mine cells).
+                // if type is "used" then it retrieves a colour that has already been used in the adjacent cells (for the painting of mine cells).
+                this.getValidColour = function(cell, type) {
+                    var col = parseInt(cell.id.substring(3));
+                    var row = parseInt(cell.parentElement.parentElement.id.substring(3));    
+                    var used_colors = []
                     
-                    
-                    
-                    
+                    try { used_colors.push(game_board.getColor(row, col+1)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row, col-1)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row+1, col-1)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row+1, col)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row+1, col+1)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row-1, col-1)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row-1, col)); } catch(e) {}
+                    try { used_colors.push(game_board.getColor(row-1, col+1)); } catch(e) {}
+                                        
+                    for (var i = 0; i < this.color_palette.length; i++) {
+                        // If you don't find a colour from color_palette in 'used_colors'.
+                        if (used_colors.indexOf(this.color_palette[i]) == -1) {
+                            if (type == "free") {
+                                game_board.setColor(row, col, this.color_palette[i]);
+                                return this.color_palette[i];
+                            }
+                        }
+                        else {
+                            if (type == "used") {
+                                return this.color_palette[i];                                
+                            }
+                        }
+                    }
                 }
+                
+                // Generate the initial HTML elements for the table. Sets each cell to call detectClick() when it is clicked. 
+                // Gives each cell its unique ID depedning on its location, and applies some classes and styling for each cell-shape type.
                 this.paintTable = function() {
                     var tbl = document.getElementById("game-table-body");
                     
@@ -149,7 +200,6 @@
                                 cell.appendChild(innerDiv);
                             }
                             else if (cell_shape == "Hexagon") {
-
                                 innerDiv.setAttribute("class", "hexagon-cell-inner");
                                 cell.appendChild(innerDiv);
                                 cell.setAttribute("class", "hex-outer");
@@ -170,22 +220,25 @@
                         }
                     }
 
-                   
-                }   
-            }
+                }//paintTable()  
+                
+            }//Display() object.
             
             
-            
+            // Create instances of the objects, and call setup functions.
             var game_board = new Board();
             game_board.resetBoard();
             var display = new Display();
             var controls = new Controller(game_board, display);
             display.paintTable();
             
+            
             function Controller(game_board, display) {
                 // Determines if cell was left-clicked or right-clicked, then calls toggleCell().
                 // If this is the first cell clicked in the game, start the timer.
                 this.interval;
+                
+                // This function is called when a cell is clicked. Toggles the stopwatch if its not already running, and then calls toggleCell().
                 this.detectClick = function(event, cell) {
                     if (!display.swrunning()) {
                         this.interval = setInterval(display.timer, 1000);
@@ -194,6 +247,8 @@
                     var click_type = event.button;
                     this.toggleCell(cell, click_type);
                 }
+                
+                // Performs the appropriate actions when a cell is clicked, depending on the status of the cell, and the type of click.
                 this.toggleCell = function(cell, click_type) {
                     // substring(3) removes 'row' and 'col' from the element IDs.
                     var col = parseInt(cell.id.substring(3));
@@ -234,7 +289,7 @@
                     if (game_board.getNum(row, col) != 0) {
                         display.paintCell(cell, "num" + game_board.getNum(row, col));
                     }
-                }
+                }//toggleCell()
                 
                 // Win or lose the game depending on the value of msg.
                 this.endGame = function(msg) {
@@ -268,201 +323,9 @@
                     game_board.resetBoard();
                     display.paintTable();
                 }
-            }
                 
+            }//Controller() object
                 
-            /*
-            
-            var interval;
-            var stopwatch_running = false;
-            function newGame() {
-                time_box = document.getElementById("timer-h3");
-                time_box.innerHTML = "00:00";
-                
-                var game_board = new Board();
-                
-                game_board.resetBoard();
-                
-                var tbl = document.getElementById("game-table-body");
-                
-                // Insert HTML cells into the table.
-                for (var i = 0; i < dim; i++) {
-                    var row = tbl.insertRow(i);
-                    row.setAttribute("id", "row" + i );
-                    for (var j = 0; j < dim; j++) {
-                        var cell = row.insertCell(j);
-                        var innerDiv = document.createElement("div");
-                        innerDiv.setAttribute("id", "col" + j);
-                        innerDiv.setAttribute("onmousedown", "detectClick(event, this)");
-                        innerDiv.innerHTML = "&nbsp";
-                        if (cell_shape == "Square") {
-                            innerDiv.setAttribute("class", "square-cell");
-                            cell.appendChild(innerDiv);
-                        }
-                        else if (cell_shape == "Hexagon") {
-                           
-                            innerDiv.setAttribute("class", "hexagon-cell-inner");
-                            cell.appendChild(innerDiv);
-                            cell.setAttribute("class", "hex-outer");
-                            tbl.parentElement.setAttribute("style", tbl.parentElement.getAttribute("style") + " border: none;");
-                        }
-                    }
-                    // If hexagon cells, apply formatting to every 2nd row.
-                    if (cell_shape == "Hexagon") {
-                        var x = 0;
-                        if (i % 2 == 1) {
-                            row.setAttribute("class", row.getAttribute('class') + " skewed");
-                            x = 12;
-                        }
-                        if (i > 0) {
-                            var y = i * 10;
-                            row.setAttribute("style", 'transform: translate(' + x + 'px, ' + (-y) + 'px)');
-                        }
-                    }
-                }
-                
-                // Add in some random mines. Number of mines = board dimension.
-                for (var i = 0; i < dim; i++) {
-                    var r1 = Math.floor(Math.random() * dim);
-                    var r2 = Math.floor(Math.random() * dim);
-                    game_board.toggleMine(r1, r2);
-                    
-                    // Increment the numbers of the cells surrounding the mines.
-                    try { game_board.incrementCell(r1-1, r2-1); } catch (e) {}
-                    try { game_board.incrementCell(r1, r2-1); } catch (e) {}
-                    try { game_board.incrementCell(r1, r2+1); } catch (e) {}
-                    try { game_board.incrementCell(r1+1, r2-1); } catch (e) {}
-                    try { game_board.incrementCell(r1+1, r2); } catch (e) {}
-                    try { game_board.incrementCell(r1-1, r2); } catch (e) {}
-                    if (cell_shape == "Square") {
-                        try { game_board.incrementCell(r1-1, r2+1); } catch (e) {}
-                        try { game_board.incrementCell(r1+1, r2+1); } catch (e) {}
-                    }
-                }
-            } //newGame()   
-            
-            // Determines if cell was left-clicked or right-clicked, then calls toggleCell().
-            // If this is the first cell clicked in the game, start the timer.
-            function detectClick(event, cell) {
-                if (!stopwatch_running) {
-                    interval = setInterval(timer, 1000);
-                    stopwatch_running = true;
-                }
-                var click_type = event.button;
-                toggleCell(cell, click_type);
-            }
-            
-            // timer() updates the clock HTML element, and is called every second by the setInterval() function above.
-            // Adds in a leading '0' if the digits are less than 10.
-            var total_seconds = 0;
-            function timer() {
-                total_seconds++;
-                var time = document.getElementById("timer-h3");
-                var minutes = Math.floor(total_seconds/60);
-                minutes = minutes < 10 ? "0" + minutes : minutes;
-                var secs = total_seconds % 60;
-                secs = secs < 10 ? "0" + secs : secs;
-                time.innerHTML = minutes + ":" + secs;
-            }
-            
-            // Stops the timer() function from being called every second. Called when the game is lost/won/reset.
-            function stopTimer() {
-                clearInterval(interval);
-                total_seconds = 0;
-                stopwatch_running = false;
-            }
-            
-            // toggleCell() determines what should happen when a cell is clicked (with either a left or right click).
-            var total_uncovered_cells = 0;
-            function toggleCell(cell, click_type) {
-                
-                // substring(3) removes 'row' and 'col' from the element IDs.
-                var col = parseInt(cell.id.substring(3));
-                var row = parseInt(cell.parentElement.parentElement.id.substring(3));                
-                
-                // If the cell has already been uncovered, return from function.
-                if (!game_board.isCovered(row, col)) return false;
-                
-                // For flagging/unflagging cells (with right clicks).
-                if (click_type == 2) {
-                    if (game_board.isFlagged(row, col)) {
-                        game_board.unflag(row, col);
-                        cell.innerHTML = "";
-                    }
-                    else {
-                        game_board.flag(row, col);
-                        cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
-                        // If number of bombs = number of uncovered cells, the game is won.
-                        if (total_uncovered_cells == (dim*dim)-dim) 
-                            winGame();
-                    }
-                    return true;
-                }
-                
-                // For uncovering cells (with left clicks).
-                if (click_type == 0) {
-                    game_board.uncover(row, col);
-                    cell.setAttribute("style", "background-color: #ff3100");
-                    cell.innerHTML = "";
-                    total_uncovered_cells++;
-                    if (total_uncovered_cells == (dim*dim)-dim)
-                        winGame();
-                }
-                if (game_board.isMine(row, col)) {
-                    cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
-                    loseGame();
-                    return true;
-                }
-                if (game_board.getNum(row, col) != 0) {
-                    cell.innerHTML = '<div class="inner-cell">' + game_board.getNum(row, col) + '</div>';
-                }
-                
-            }
-            
-            
-            // loseGame() is called when the user uncovers a mine, and therefore, loses the game.
-            // Disables the toggling of cells, stops the timer, and displays a 'losing' message.
-            function loseGame() {
-                disableCells();
-                stopTimer();
-                var message = document.getElementById("message-div");
-                message.innerHTML = '<h3 id="message-h3">You lose!</h3>';
-            }
-            
-            // winGame() is called when the user wins the game (ie. all cells except mines are uncovered, 
-            // and all mines are flagged).
-            function winGame() {
-                stopTimer();
-                disableCells();
-                var message = document.getElementById("message-div");
-                message.innerHTML = '<h3 id="message-h3">You win!</h3>';   
-            }
-            
-            // Disables the toggling of cells by making the "mousedown" attribute do nothing.
-            function disableCells() {
-                var tbl = document.getElementById("game-table-body").rows;
-                    for (var i = 0; i < dim; i++) {
-                        row = tbl[i].cells;
-                        for (var j = 0; j < dim; j++) {
-                            row[j].firstChild.setAttribute("onmousedown", "return false");
-                        }
-                    }
-             }
-            
-            // resetGame() is called when the user clicks the 'reset' button above the game grid.
-            function resetGame() {
-                var tbl = document.getElementById("game-table-body");
-                while (tbl.firstChild) {
-                    tbl.removeChild(tbl.firstChild);
-                }
-                var message = document.getElementById("message-div");
-                message.innerHTML = "";
-                total_uncovered_cells = 0;
-                stopTimer();
-                newGame();
-            }
-            
-            */
             
         </script>
         
