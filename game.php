@@ -26,6 +26,12 @@
             var dim = parseInt("<?php echo $dimensions; ?>");
             var colour_mode = "<?php echo $colour_mode; ?>" === "True" ? true : false;
             
+            // Create instances of the objects, and call setup functions.
+            var game_board = new Board();
+            game_board.resetBoard();
+            var display = new Display();
+            var controls = new Controller(game_board, display);
+            display.paintTable();
             
             // Board class (model).
             function Board() {
@@ -63,8 +69,6 @@
                             try { this.incrementCell(r1+1, r2+1); } catch (e) {}
                         }
                     }
-                    
-                    
                 }
                 // Simple getter/setter methods.
                 this.toggleMine = function(row, col) { this.board[row][col].bomb = !this.board[row][col].bomb; }
@@ -76,7 +80,6 @@
                 this.flag = function(row, col) { this.board[row][col].flagged = true; }
                 this.unflag = function(row, col) { this.board[row][col].flagged = false; }
                 this.uncover = function(row, col) { this.board[row][col].covered = false; }
-                
                 this.getColor = function(row, col) { return this.board[row][col].color; }
                 this.setColor = function(row, col, color) { this.board[row][col].color = color; }
             }
@@ -85,9 +88,7 @@
             function Display() {
                 var total_seconds = 0;
                 this.stopwatch_running = false;
-                
                 this.color_palette = ["red", "skyblue", "orange", "green", "purple", "magenta", "gold", "teal", "aqua", "brown", "linen", "lightgray"];
-                
                 this.timer = function() {
                     total_seconds++;
                     var time = document.getElementById("timer-h3");
@@ -96,7 +97,6 @@
                     var secs = total_seconds % 60;
                     secs = secs < 10 ? "0" + secs : secs;
                     time.innerHTML = minutes + ":" + secs;
-                    //time.innerHTML = total_seconds;
                 }
                 // Prints the winning/losing message to the user.
                 this.printMessage = function(msg) { 
@@ -116,12 +116,8 @@
                 
                 // Paints a given cell a certain way.
                 this.paintCell = function (cell, type) {
-                    if (type == "unflag") {
-                        cell.innerHTML = "";
-                    }
-                    else if (type == "flag") {
-                        cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
-                    }
+                    if (type == "unflag") cell.innerHTML = "";
+                    else if (type == "flag") cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
                     else if (type == "uncover") {
                         if (!colour_mode) {
                             cell.setAttribute("style", "background-color: #ff3100");
@@ -134,17 +130,11 @@
                     }
                     else if (type == "mine") {
                         cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
-                        if (colour_mode) {
-                            cell.setAttribute("style", "background-color: " + this.getValidColour(cell, "used"));
-
-                        }
-                        
+                        if (colour_mode) cell.setAttribute("style", "background-color: " + this.getValidColour(cell, "used"));
                     }
                     // A cell's number is passed after the "num" string, eg. "num3", so use substr() to separate these out.
-                    else if (type.substr(0, 3) == "num") {
-                        cell.innerHTML = '<div class="inner-cell">' + type.substr(3, 1) + '</div>';   
-                    }
-                    
+                    else if (type.substr(0, 3) == "num") cell.innerHTML = '<div class="inner-cell">' + type.substr(3, 1) + '</div>';                    
+                
                 }//paintCell()
                 
                 
@@ -154,7 +144,6 @@
                     var col = parseInt(cell.id.substring(3));
                     var row = parseInt(cell.parentElement.parentElement.id.substring(3));    
                     var used_colors = []
-                    
                     try { used_colors.push(game_board.getColor(row, col+1)); } catch(e) {}
                     try { used_colors.push(game_board.getColor(row, col-1)); } catch(e) {}
                     try { used_colors.push(game_board.getColor(row+1, col-1)); } catch(e) {}
@@ -163,7 +152,16 @@
                     try { used_colors.push(game_board.getColor(row-1, col-1)); } catch(e) {}
                     try { used_colors.push(game_board.getColor(row-1, col)); } catch(e) {}
                     try { used_colors.push(game_board.getColor(row-1, col+1)); } catch(e) {}
-                                        
+
+                    // Shuffle the color_palette array.
+                    var j, x, i;
+                    for (i = this.color_palette.length; i; i--) {
+                        j = Math.floor(Math.random() * i);
+                        x = this.color_palette[i-1];
+                        this.color_palette[i-1] = this.color_palette[j];
+                        this.color_palette[j] = x;
+                    }
+       
                     for (var i = 0; i < this.color_palette.length; i++) {
                         // If you don't find a colour from color_palette in 'used_colors'.
                         if (used_colors.indexOf(this.color_palette[i]) == -1) {
@@ -174,17 +172,21 @@
                         }
                         else {
                             if (type == "used") {
+                                console.log(this.color_palette);
+                                console.log("choosing " + this.color_palette[i]);
                                 return this.color_palette[i];                                
                             }
                         }
                     }
-                }
+                    // If no colours used, just return red as a fail-safe default.
+                    return "red";
+                }//getValidColor()
+                
                 
                 // Generate the initial HTML elements for the table. Sets each cell to call detectClick() when it is clicked. 
                 // Gives each cell its unique ID depedning on its location, and applies some classes and styling for each cell-shape type.
                 this.paintTable = function() {
                     var tbl = document.getElementById("game-table-body");
-                    
                     // Insert HTML cells into the table.
                     for (var i = 0; i < dim; i++) {
                         var row = tbl.insertRow(i);
@@ -225,14 +227,8 @@
             }//Display() object.
             
             
-            // Create instances of the objects, and call setup functions.
-            var game_board = new Board();
-            game_board.resetBoard();
-            var display = new Display();
-            var controls = new Controller(game_board, display);
-            display.paintTable();
             
-            
+            // Controller object detects user events and responds.
             function Controller(game_board, display) {
                 // Determines if cell was left-clicked or right-clicked, then calls toggleCell().
                 // If this is the first cell clicked in the game, start the timer.
@@ -278,8 +274,7 @@
                         game_board.uncover(row, col);
                         display.paintCell(cell, "uncover");
                         game_board.total_uncovered_cells++;
-                        if (game_board.total_uncovered_cells == (dim*dim)-dim)
-                            this.endGame("win");
+                        if (game_board.total_uncovered_cells == (dim*dim)-dim) this.endGame("win");
                     }
                     if (game_board.isMine(row, col)) {
                         display.paintCell(cell, "mine");
@@ -288,6 +283,9 @@
                     }
                     if (game_board.getNum(row, col) != 0) {
                         display.paintCell(cell, "num" + game_board.getNum(row, col));
+                    }
+                    else {
+                        this.recursiveUncover(cell, row, col);
                     }
                 }//toggleCell()
                 
