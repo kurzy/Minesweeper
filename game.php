@@ -56,18 +56,39 @@
                         var r1 = Math.floor(Math.random() * dim);
                         var r2 = Math.floor(Math.random() * dim);
                         this.toggleMine(r1, r2);
-
-                        // Increment the numbers of the cells surrounding the mines.
-                        try { this.incrementCell(r1-1, r2-1); } catch (e) {}
-                        try { this.incrementCell(r1, r2-1); } catch (e) {}
-                        try { this.incrementCell(r1, r2+1); } catch (e) {}
-                        try { this.incrementCell(r1+1, r2-1); } catch (e) {}
-                        try { this.incrementCell(r1+1, r2); } catch (e) {}
-                        try { this.incrementCell(r1-1, r2); } catch (e) {}
+                                            
                         if (cell_shape == "Square") {
+                            // Increment the numbers of the cells surrounding the mines.
+                            try { this.incrementCell(r1-1, r2-1); } catch (e) {}
+                            try { this.incrementCell(r1, r2-1); } catch (e) {}
+                            try { this.incrementCell(r1, r2+1); } catch (e) {}
+                            try { this.incrementCell(r1+1, r2-1); } catch (e) {}
+                            try { this.incrementCell(r1+1, r2); } catch (e) {}
+                            try { this.incrementCell(r1-1, r2); } catch (e) {}
                             try { this.incrementCell(r1-1, r2+1); } catch (e) {}
                             try { this.incrementCell(r1+1, r2+1); } catch (e) {}
                         }
+                        
+                        else if (cell_shape == "Hexagon") {
+                            // If even row.
+                            if (r1 % 2 == 0) {
+                                try { this.incrementCell(r1, r2-1); } catch (e) {}
+                                try { this.incrementCell(r1, r2+1); } catch (e) {}
+                                try { this.incrementCell(r1-1, r2-1); } catch (e) {}
+                                try { this.incrementCell(r1-1, r2); } catch (e) {}
+                                try { this.incrementCell(r1+1, r2-1); } catch (e) {}
+                                try { this.incrementCell(r1+1, r2); } catch (e) {} 
+                            }
+                            // If odd row.
+                            else {
+                                try { this.incrementCell(r1, r2-1); } catch (e) {}
+                                try { this.incrementCell(r1, r2+1); } catch (e) {}
+                                try { this.incrementCell(r1-1, r2); } catch (e) {}
+                                try { this.incrementCell(r1+1, r2); } catch (e) {} 
+                                try { this.incrementCell(r1+1, r2+1); } catch (e) {} 
+                                try { this.incrementCell(r1-1, r2+1); } catch (e) {} 
+                            } 
+                        }                        
                     }
                 }
                 // Simple getter/setter methods.
@@ -187,6 +208,8 @@
                 // Gives each cell its unique ID depedning on its location, and applies some classes and styling for each cell-shape type.
                 this.paintTable = function() {
                     var tbl = document.getElementById("game-table-body");
+                    tbl.parentElement.setAttribute("style", "border: none;");
+
                     // Insert HTML cells into the table.
                     for (var i = 0; i < dim; i++) {
                         var row = tbl.insertRow(i);
@@ -205,7 +228,6 @@
                                 innerDiv.setAttribute("class", "hexagon-cell-inner");
                                 cell.appendChild(innerDiv);
                                 cell.setAttribute("class", "hex-outer");
-                                tbl.parentElement.setAttribute("style", tbl.parentElement.getAttribute("style") + " border: none;");
                             }
                         }
                         // If hexagon cells, apply special formatting to every 2nd row.
@@ -278,14 +300,14 @@
                     }
                     if (game_board.isMine(row, col)) {
                         display.paintCell(cell, "mine");
-                        this.endGame("lose");
+                        //this.endGame("lose");
                         return true;
                     }
                     if (game_board.getNum(row, col) != 0) {
                         display.paintCell(cell, "num" + game_board.getNum(row, col));
                     }
                     else {
-                        this.recursiveUncover(cell, row, col);
+                        //this.recursiveUncover(cell, row, col);
                     }
                 }//toggleCell()
                 
