@@ -137,11 +137,6 @@ body {
 .hex-outer .inner-cell {
    transform: rotate(-45deg);
 }
-.skewed {
-    
-}
-
-
 
 #mine-img {
     height: 15px;
@@ -209,6 +204,11 @@ body {
     line-height: 0px;
     animation-name: message-fade-in;
     animation-duration: 1s;
+    -webkit-user-select: none;        
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    cursor: default;
 }
 @keyframes message-fade-in {
     from {color: white; margin-top: 30px;}
