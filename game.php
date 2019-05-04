@@ -4,9 +4,29 @@
         header("Location: index.html");
         exit();
     }
-    $cell_shape = $_POST["cell_shape"];
-    $dimensions = filter_var($_POST["dimensions"], FILTER_SANITIZE_STRING);
-    $colour_mode = $_POST["colour_mode"];
+    $cell_shape = filter_var($_POST["cell_shape"], FILTER_SANITIZE_STRING);
+    $colour_mode = filter_var($_POST["colour_mode"], FILTER_SANITIZE_STRING);
+    $dimensions = 0;
+    try {
+        $dimensions = (int) filter_var($_POST["dimensions"], FILTER_SANITIZE_NUMBER_INT);
+    }
+    catch (Exception $e) {
+        // header("Location: index.html");
+        echo $dimensions;
+        exit();
+    }
+    // Check the inputs are valid.
+    if ($dimensions == "" || $cell_shape == "" || $colour_mode == "" 
+    || $dimensions > 26 || $dimensions < 4 
+    || !($cell_shape === "Square" || $cell_shape === "Hexagon")
+    || !($colour_mode === "True" || $colour_mode === "False")) {
+        header("Location: index.html");
+        exit();
+    }
+    
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -16,15 +36,21 @@
         <meta charset="utf-8">
         <meta name="author" content="Jack Kearsley, July 2017.">
         <meta name="description" content="Minesweeper Game">
+<<<<<<< HEAD
         <link rel="stylesheet" type="text/css" href="css/desktop.css">
         <link rel="shortcut icon" href="images/favicon.png" type="image/png">
         <!-- images made by 'Freepik' from www.flaticon.com -->
         
+=======
+        <link rel="stylesheet" type="text/css" href="desktop.css">
+        <link rel="shortcut icon" href="Images/favicon.png" type="image/png">
+        <!-- Images made by 'Freepik' from www.flaticon.com -->
+>>>>>>> 2de3407b9e6321844e64411c36c559c4bef0359f
         <script type="text/javascript">
-            // Get values from index.html POST.
-            var cell_shape = "<?php echo $cell_shape; ?>";
             var dim = parseInt("<?php echo $dimensions; ?>");
+            var cell_shape = "<?php echo $cell_shape; ?>";
             var colour_mode = "<?php echo $colour_mode; ?>" === "True" ? true : false;
+<<<<<<< HEAD
             
             // Create instances of the objects, and call setup functions.
             var game_board = new Board();
@@ -347,11 +373,13 @@
             }//Controller() object
                 
             
+=======
+>>>>>>> 2de3407b9e6321844e64411c36c559c4bef0359f
         </script>
-        
+        <script type="text/javascript" src="js/msweeper.js"></script>
     </head>
     
-    <body onload="display.paintTable()">
+    <body onload="init()">
         <div id="main-title">
             <a href="index.html">
                 <h1>Minesweeper</h1>
@@ -359,7 +387,6 @@
         </div>
         
         <div id="game-container">
-            
             <div id="game-controls">
                 <div id="game-timer">
                     <h3 class="game-btn-h3" id="timer-h3">00:00</h3>
@@ -375,19 +402,14 @@
                         <!-- Cells are inserted via Javascript. -->
                     </tbody>
                 </table>
-                
+        
                 <div id="message-div">
                     <!-- Winning/Losing message displayed here when game ends. -->
                 </div>
-                
             </div>   
-            
         </div>
-        
         <div id="footer">
-            <p>Jack Kearsley (s5007230), July 2017, for 2805ICT.</p>
-        </div>
-                    
+            <p>Jack Kearsley, 2017.</p>
+        </div>         
     </body>
-
 </html>
