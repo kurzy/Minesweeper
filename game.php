@@ -16,9 +16,9 @@
         <meta charset="utf-8">
         <meta name="author" content="Jack Kearsley, July 2017.">
         <meta name="description" content="Minesweeper Game">
-        <link rel="stylesheet" type="text/css" href="desktop.css">
-        <link rel="shortcut icon" href="Images/favicon.png" type="image/png">
-        <!-- Images made by 'Freepik' from www.flaticon.com -->
+        <link rel="stylesheet" type="text/css" href="css/desktop.css">
+        <link rel="shortcut icon" href="images/favicon.png" type="image/png">
+        <!-- images made by 'Freepik' from www.flaticon.com -->
         
         <script type="text/javascript">
             // Get values from index.html POST.
@@ -138,7 +138,7 @@
                 // Paints a given cell a certain way.
                 this.paintCell = function (cell, type) {
                     if (type == "unflag") cell.innerHTML = "";
-                    else if (type == "flag") cell.innerHTML = '<div class="inner-cell"><img src="Images/flag.png" alt="flag" id="flag-img"></div>';
+                    else if (type == "flag") cell.innerHTML = '<div class="inner-cell"><img src="images/flag.png" alt="flag" id="flag-img"></div>';
                     else if (type == "uncover") {
                         if (!colour_mode) {
                             cell.setAttribute("style", "background-color: #ff3100");
@@ -150,7 +150,7 @@
                         }
                     }
                     else if (type == "mine") {
-                        cell.innerHTML = '<div class="inner-cell"><img src="Images/mine.png" alt="mine" id="mine-img"></div>';
+                        cell.innerHTML = '<div class="inner-cell"><img src="images/mine.png" alt="mine" id="mine-img"></div>';
                         if (colour_mode) cell.setAttribute("style", "background-color: " + this.getValidColour(cell, "used"));
                     }
                     // A cell's number is passed after the "num" string, eg. "num3", so use substr() to separate these out.
@@ -300,7 +300,7 @@
                     }
                     if (game_board.isMine(row, col)) {
                         display.paintCell(cell, "mine");
-                        //this.endGame("lose");
+                        this.endGame("lose");
                         return true;
                     }
                     if (game_board.getNum(row, col) != 0) {
