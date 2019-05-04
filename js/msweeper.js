@@ -1,36 +1,18 @@
-/* Check the user's input */
-function check(form) {
-    var dim = form.dimensions.value;
-    var shape = form.cell_shape.value;
-    if (dim == null || shape == null || dim == "" || shape == "") {
-        alert("Please enter a dimension, cell shape and colour mode.");
-        return false;
-    }
-    else if (dim > 26 || dim < 4) {
-        alert("Please enter a dimension between 4..26");
-        form.dimensions.focus();
-        return false;
-    }
-    else if (isNaN(dim) || dim % 1 != 0) {
-        alert("Dimension must be a whole number from 4..26.");
-        return false;
-    }
-    return true;
-}
-
+// Controls are visible to DOM elements.
 var controls;
 
-function init(d, cs, cm) {
-    // Create instances of the objects, and call setup functions.
-    var game_board = new Board();
+function init(dim,cell_shape,colour_mode) {
+    // // Create instances of the objects, and call setup functions.
+    var game_board = new Board(dim);
     game_board.resetBoard();
     var display = new Display(game_board);
     controls = new Controller(game_board, display);
     display.paintTable();
+    controls.setListeners();
 }
 
 // Board class (model).
-function Board() {
+function Board(dim) {
     this.cell = function() {
         this.covered = true;
         this.flagged = false;
@@ -99,10 +81,12 @@ function Board() {
     this.uncover = function(row, col) { this.board[row][col].covered = false; }
     this.getColor = function(row, col) { return this.board[row][col].color; }
     this.setColor = function(row, col, color) { this.board[row][col].color = color; }
+
+    return this;
 }
 
 // Display class is responsible for all of the visual displays.
-function Display(game_board, ) {
+function Display(game_board) {
     var total_seconds = 0;
     this.stopwatch_running = false;
     this.color_palette = ["red", "skyblue", "orange", "green", "purple", "magenta", "gold", "teal", "aqua", "brown", "linen", "lightgray"];
@@ -189,8 +173,6 @@ function Display(game_board, ) {
             }
             else {
                 if (type == "used") {
-                    console.log(this.color_palette);
-                    console.log("choosing " + this.color_palette[i]);
                     return this.color_palette[i];                                
                 }
             }
@@ -214,7 +196,6 @@ function Display(game_board, ) {
                 var cell = row.insertCell(j);
                 var innerDiv = document.createElement("div");
                 innerDiv.setAttribute("id", "col" + j);
-                innerDiv.setAttribute("onmousedown", "controls.detectClick(event, this)");
                 innerDiv.innerHTML = "&nbsp";
                 if (cell_shape == "Square") {
                     innerDiv.setAttribute("class", "square-cell");
@@ -250,8 +231,19 @@ function Display(game_board, ) {
 function Controller(game_board, display) {
     // Determines if cell was left-clicked or right-clicked, then calls toggleCell().
     // If this is the first cell clicked in the game, start the timer.
-    this.interval;
-    
+    this.interval = null;
+
+    this.setListeners = function () {
+        var tbl = document.getElementById("game-table-body");
+        for (var row_index = 0; row_index < tbl.rows.length; row_index++)
+            for (var col_index = 0; col_index < tbl.rows[row_index].cells.length; col_index++)
+                tbl.rows[row_index].cells[col_index].addEventListener('mousedown', 
+                    function(event) {
+                        controls.detectClick(event, event.target);
+                    }
+                );
+    }
+
     // This function is called when a cell is clicked. Toggles the stopwatch if its not already running, and then calls toggleCell().
     this.detectClick = function(event, cell) {
         if (!display.swrunning()) {

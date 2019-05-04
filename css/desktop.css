@@ -1,11 +1,11 @@
 @font-face {
     font-family: RaiderCrusader;
-    src: url(fonts/raidercrusader.ttf);
+    src: url(../fonts/raidercrusader.ttf);
     /*   Font created by Daniel Zadorozny, http://www.iconian.com/    */
 }
 
 body {
-    background-color: white;
+    background-color: #1e1e1e;
     min-width: 800px;
 }
 
@@ -14,12 +14,16 @@ body {
 #index-container {
     font-family: RaiderCrusader, sans-serif;
     border: 2px solid red;
+    border-radius: 2px;
     height: 260px;
     width: 60%;
     max-width: 500px;
     margin: auto;
     color: #FF3100;
-    
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 }
 #index-container #form-div {
     height: 90%;
@@ -27,7 +31,6 @@ body {
     position: relative;
     margin: 8px auto;
     font-size: 20px;
-    
 }
 #index-container form {
     text-align: center;
@@ -35,7 +38,14 @@ body {
 }
 #index-container #input-dimensions {
     width: 40px;
-    border: 1px solid #FF3100;
+    border: 2px solid #FF3100;
+    border-radius: 2px;
+    background-color: #1e1e1e;
+    color: #e2e2e2;
+    margin-left: 5px;
+    height: 20px;
+    padding-left: 2px;
+    font-weight: bold;
 }
 #index-container #play-btn {
     font-family: RaiderCrusader, sans-serif;
@@ -43,7 +53,9 @@ body {
     height: 50px;
     width: 90px;
     color: #FF3100;
-    border: 2px solid #FF3100;   
+    border: 2px solid #FF3100;
+    border-radius: 2px;   
+    background-color: #1e1e1e;
 }
 #main-title {
     font-family: RaiderCrusader, sans-serif;
@@ -211,7 +223,7 @@ body {
     animation-duration: 1s;
 }
 @keyframes message-fade-in {
-    from {color: white; margin-top: 30px;}
+    from {color: #1e1e1e; margin-top: 30px;}
     to {color: #FF3100; margin-top 10px;}
 }
 
