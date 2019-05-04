@@ -36,21 +36,14 @@
         <meta charset="utf-8">
         <meta name="author" content="Jack Kearsley, July 2017.">
         <meta name="description" content="Minesweeper Game">
-<<<<<<< HEAD
         <link rel="stylesheet" type="text/css" href="css/desktop.css">
         <link rel="shortcut icon" href="images/favicon.png" type="image/png">
         <!-- images made by 'Freepik' from www.flaticon.com -->
         
-=======
-        <link rel="stylesheet" type="text/css" href="desktop.css">
-        <link rel="shortcut icon" href="Images/favicon.png" type="image/png">
-        <!-- Images made by 'Freepik' from www.flaticon.com -->
->>>>>>> 2de3407b9e6321844e64411c36c559c4bef0359f
         <script type="text/javascript">
             var dim = parseInt("<?php echo $dimensions; ?>");
             var cell_shape = "<?php echo $cell_shape; ?>";
             var colour_mode = "<?php echo $colour_mode; ?>" === "True" ? true : false;
-<<<<<<< HEAD
             
             // Create instances of the objects, and call setup functions.
             var game_board = new Board();
@@ -373,8 +366,6 @@
             }//Controller() object
                 
             
-=======
->>>>>>> 2de3407b9e6321844e64411c36c559c4bef0359f
         </script>
         <script type="text/javascript" src="js/msweeper.js"></script>
     </head>
